@@ -1,19 +1,22 @@
 /// <reference types="Cypress"/>
+import {usuario} from "../pojo/usuario";
+
+var uri = 'https://api-homologacao.getnet.com.br/'
+var uriToken = uri+'auth/oauth/v2/token'
+var uriTokenizacaoPCI = uri+'v1/tokens/card'
+const meuUsuario = new usuario('67823c6d-58de-494f-96d9-86a4c22682cb', 'c2d6a06f-5f31-448b-9079-7e170e8536e4')
+var autoriza = btoa(meuUsuario.nomeUsuario+':'+meuUsuario.senhaUsuario)
+var passe = null
 
 describe('API - testeGETNET', () => {
-
-    var usuario = '67823c6d-58de-494f-96d9-86a4c22682cb'
-    var senha = 'c2d6a06f-5f31-448b-9079-7e170e8536e4'
-    var autoriza = btoa(usuario+':'+senha)
-    var passe = null
 
     it('Status 200- Gerar Token de Acesso', () => {
         cy.request({
             method: 'POST',
-            url: 'https://api-homologacao.getnet.com.br/auth/oauth/v2/token',
+            url: uriToken,
             auth:{
-                user: usuario,
-                pass: senha
+                user: meuUsuario.nomeUsuario,
+                pass: meuUsuario.senhaUsuario
             },
             headers: {
                 'Content-Type' : 'application/x-www-form-urlencoded',
@@ -33,10 +36,10 @@ describe('API - testeGETNET', () => {
     it('Status 400- Gerar Token de Acesso', () => {
         cy.request({
             method: 'POST',
-            url: 'https://api-homologacao.getnet.com.br/auth/oauth/v2/token',
+            url: uriToken,
             auth:{
-                user: usuario,
-                pass: senha
+                user: meuUsuario.nomeUsuario,
+                pass: meuUsuario.senhaUsuario
             },
             headers: {
                 'Content-Type' : 'application/json; charset=utf-8',
@@ -56,9 +59,9 @@ describe('API - testeGETNET', () => {
     it('Status 401- Gerar Token de Acesso', () => {
         cy.request({
             method: 'POST',
-            url: 'https://api-homologacao.getnet.com.br/auth/oauth/v2/token',
+            url: uriToken,
             auth:{
-                user: usuario,
+                user: meuUsuario.nomeUsuario,
                 pass: 'Sem autorização'
             },
             headers: {
@@ -80,7 +83,7 @@ describe('API - testeGETNET', () => {
     it('Tokenização PCI', () => {
         cy.request({
             method: 'POST',
-            url: 'https://api-homologacao.getnet.com.br/v1/tokens/card',
+            url: uriTokenizacaoPCI,
             headers: {
                 'Content-Type' : 'application/json; charset=utf-8',
                 'Authorization' : 'Bearer '+ passe
@@ -93,6 +96,7 @@ describe('API - testeGETNET', () => {
         })
         .then((response => {
             expect(response.status).to.eq(201)
+            expect(response.body.number_token).to.not.equal(null)
         }))
     })
 
